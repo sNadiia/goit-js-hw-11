@@ -2,6 +2,8 @@ import axios from 'axios';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
+import debounce from 'lodash.debounce';
+const DEBOUNCE_DELAY = 250;
 
 const form = document.getElementById('search-form');
 const gallery = document.querySelector('.gallery');
@@ -100,23 +102,27 @@ function onSubmit(event) {
 }
 
 async function getPhotoMarkup() {
-  const response = await photoService.getPhoto();
-  const arrayPhotos = response.data.hits;
+  try {
+    const response = await photoService.getPhoto();
+    const arrayPhotos = response.data.hits;
 
-  if (arrayPhotos.length === 0) {
-    loadMoreBtn.hide();
-    Notify.failure(
-      'Sorry, there are no images matching your search query. Please try again.'
-    );
-    return '';
-  } else {
-    showTotalHits(response.data.totalHits);
-    const markuplist = arrayPhotos.reduce(
-      (markup, photo) => markup + createMarkup(photo),
-      ''
-    );
-    loadMoreBtn.enable();
-    return updatePhotoGallery(markuplist);
+    if (arrayPhotos.length === 0) {
+      loadMoreBtn.hide();
+      Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+      return '';
+    } else {
+      showTotalHits(response.data.totalHits);
+      const markuplist = arrayPhotos.reduce(
+        (markup, photo) => markup + createMarkup(photo),
+        ''
+      );
+      loadMoreBtn.enable();
+      return updatePhotoGallery(markuplist);
+    }
+  } catch (err) {
+    onError(err);
   }
 }
 
@@ -213,7 +219,7 @@ function handleScroll() {
   }
 }
 
-window.addEventListener('scroll', handleScroll);
+window.addEventListener('scroll', debounce(handleScroll, DEBOUNCE_DELAY));
 
 function initializeLightbox() {
   const lightbox = new SimpleLightbox('.photo-card .photo-card-link', {
