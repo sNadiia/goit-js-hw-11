@@ -5,6 +5,13 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 import debounce from 'lodash.debounce';
 const DEBOUNCE_DELAY = 250;
 
+let galleryLightBox = new SimpleLightbox('.gallery .photo-card-link', {
+  widthRatio: 0.8,
+  heightRatio: 0.8,
+  animationSpeed: 250,
+  // scaleImageToRatio: true,
+});
+
 const form = document.getElementById('search-form');
 const gallery = document.querySelector('.gallery');
 
@@ -16,7 +23,6 @@ const searchParams = new URLSearchParams({
   safesearch: 'true',
   per_page: 40,
 });
-let lightbox;
 
 class PhotoService {
   constructor() {
@@ -30,10 +36,6 @@ class PhotoService {
     );
     this.incrementPage();
     return response;
-
-    // const arrayPhotos = response.data.hits;
-    // showTotalHits(response.data.totalHits);
-    // return arrayPhotos;
   }
 
   resetPage() {
@@ -97,7 +99,6 @@ function onSubmit(event) {
     getPhotoMarkup();
     form.reset();
     loadMoreBtn.show();
-    initializeLightbox();
   }
 }
 
@@ -119,7 +120,8 @@ async function getPhotoMarkup() {
         ''
       );
       loadMoreBtn.enable();
-      return updatePhotoGallery(markuplist);
+      updatePhotoGallery(markuplist);
+      galleryLightBox.refresh();
     }
   } catch (err) {
     onError(err);
@@ -144,9 +146,9 @@ async function fetchPhotos() {
         ''
       );
       loadMoreBtn.enable();
-      return updatePhotoGallery(markuplist);
+      updatePhotoGallery(markuplist);
+      galleryLightBox.refresh();
     }
-    initializeLightbox();
   } catch (err) {
     onError(err);
   }
@@ -171,7 +173,7 @@ function createMarkup({
       width=250
       height=200
     />
- 
+    </a>
   <div class="info">
     <p class="info-item">
       <b>Likes</b>
@@ -190,7 +192,7 @@ function createMarkup({
       <span>${downloads}</span>
     </p>
   </div>
-  </a>
+  
 </div>`;
 }
 
@@ -220,50 +222,3 @@ function handleScroll() {
 }
 
 window.addEventListener('scroll', debounce(handleScroll, DEBOUNCE_DELAY));
-
-function initializeLightbox() {
-  const lightbox = new SimpleLightbox('.photo-card .photo-card-link', {
-    captions: true,
-    captionsData: 'alt',
-    captionPosition: 'bottom',
-    captionDelay: 250,
-  });
-}
-
-// const lightbox = new SimpleLightbox('.gallery a', {
-//   captionsData: 'alt',
-//   captionDelay: 250,
-//   animationSpeed: 250,
-// });
-
-// let galleryLightBox = new SimpleLightbox('.gallery a', {
-//   captions: true,
-//   captionsData: 'alt',
-//   captionPosition: 'bottom',
-//   captionDelay: 250,
-// });
-// console.log(galleryLightBox);
-
-// lightbox.on('show.simplelightbox', function () {
-//   console.log('heloo');
-// });
-// lightbox.refresh();
-
-// let gallery = new SimpleLightbox(".gallery a", {
-//   captionDelay: 250,
-//   captionsData: "alt",
-// });
-// let lightbox = new SimpleLightbox(
-//  ('.gallery a') ,
-//   {
-//     captions: true,
-//     captionsData: 'alt',
-//     captionPosition: 'bottom',
-//     captionDelay: 250,
-//   }
-// );
-// console.log(lightbox);
-
-// lightbox.on('shown.simplelightbox', function () {});
-
-// // lightbox.refresh();
