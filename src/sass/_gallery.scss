@@ -1,13 +1,12 @@
 .gallery {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px;
-  padding-top: 25px;
+  gap: 30px;
+  padding: 30px 40px;
   max-width: 1200px;
+  align-items: center;
 }
 .photo-card {
-  // flex-basis: calc(100% - 72px) / 4;
-  // width: 250px;
   
 }
 
