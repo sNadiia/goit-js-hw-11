@@ -1,7 +1,25 @@
 .search-form {
-  padding-top: 20px;
-  padding-bottom: 20px;
-  padding-left: 400px;
-  padding-right: 400px;
-  background-color: blue;
+  background-color: rgb(91, 91, 146);
+  display: flex;
+  min-height: 45px;
+  justify-content: center;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.search-form input {
+  border-radius: 5px;
+  height: 35px;
+  width: 400px;
+  outline: none;
+  border: 1px solid rgb(158, 165, 173);
+}
+
+.search-form button {
+  border-radius: 5px;
+  height: 32px;
+  border: 1px solid transparent;
+  margin-left: -35px;
+  outline: none;
 }

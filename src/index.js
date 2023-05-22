@@ -8,24 +8,13 @@ const gallery = document.querySelector('.gallery');
 
 const key = `36503211-5a6b1020ee80a2c92835fdd88`;
 
-// let lightbox = new SimpleLightbox('.photo-card a', {
-//   captions: true,
-//   captionsData: 'alt',
-//   captionPosition: 'bottom',
-//   captionDelay: 250,
-// });
-// console.log(lightbox);
-// lightbox.on('shown.simplelightbox', function () {
-//   console.log('heloo');
-// });
-// lightbox.refresh();
-
 const searchParams = new URLSearchParams({
   image_type: 'photo',
   orientation: 'horizontal',
   safesearch: 'true',
   per_page: 40,
 });
+let lightbox;
 
 class PhotoService {
   constructor() {
@@ -102,37 +91,32 @@ function onSubmit(event) {
   else {
     photoService.searchValue = value;
     photoService.resetPage();
-
     clearPhotoGallery();
     getPhotoMarkup();
     form.reset();
     loadMoreBtn.show();
-    // lightbox.refresh();
+    initializeLightbox();
   }
 }
 
 async function getPhotoMarkup() {
-  try {
-    const response = await photoService.getPhoto();
-    const arrayPhotos = response.data.hits;
+  const response = await photoService.getPhoto();
+  const arrayPhotos = response.data.hits;
 
-    if (arrayPhotos.length === 0) {
-      loadMoreBtn.hide();
-      Notify.failure(
-        'Sorry, there are no images matching your search query. Please try again.'
-      );
-      return '';
-    } else {
-      showTotalHits(response.data.totalHits);
-      const markuplist = arrayPhotos.reduce(
-        (markup, photo) => markup + createMarkup(photo),
-        ''
-      );
-      loadMoreBtn.enable();
-      return updatePhotoGallery(markuplist);
-    }
-  } catch (err) {
-    onError(err);
+  if (arrayPhotos.length === 0) {
+    loadMoreBtn.hide();
+    Notify.failure(
+      'Sorry, there are no images matching your search query. Please try again.'
+    );
+    return '';
+  } else {
+    showTotalHits(response.data.totalHits);
+    const markuplist = arrayPhotos.reduce(
+      (markup, photo) => markup + createMarkup(photo),
+      ''
+    );
+    loadMoreBtn.enable();
+    return updatePhotoGallery(markuplist);
   }
 }
 
@@ -156,6 +140,7 @@ async function fetchPhotos() {
       loadMoreBtn.enable();
       return updatePhotoGallery(markuplist);
     }
+    initializeLightbox();
   } catch (err) {
     onError(err);
   }
@@ -172,15 +157,15 @@ function createMarkup({
 }) {
   return `
   <div class="photo-card">
-  <a href="${largeImageURL}">
+  <a class="photo-card-link" href="${largeImageURL}">
     <img
       src="${webformatURL}"
       alt="${tags}"
       loading="lazy"
-      width="250"
-      height="200"
+      width=250
+      height=200
     />
-  </a>
+ 
   <div class="info">
     <p class="info-item">
       <b>Likes</b>
@@ -199,12 +184,12 @@ function createMarkup({
       <span>${downloads}</span>
     </p>
   </div>
+  </a>
 </div>`;
 }
 
 function updatePhotoGallery(markuplist) {
   gallery.insertAdjacentHTML('beforeend', markuplist);
-  
 }
 
 function clearPhotoGallery() {
@@ -229,3 +214,50 @@ function handleScroll() {
 }
 
 window.addEventListener('scroll', handleScroll);
+
+function initializeLightbox() {
+  const lightbox = new SimpleLightbox('.photo-card .photo-card-link', {
+    captions: true,
+    captionsData: 'alt',
+    captionPosition: 'bottom',
+    captionDelay: 250,
+  });
+}
+
+// const lightbox = new SimpleLightbox('.gallery a', {
+//   captionsData: 'alt',
+//   captionDelay: 250,
+//   animationSpeed: 250,
+// });
+
+// let galleryLightBox = new SimpleLightbox('.gallery a', {
+//   captions: true,
+//   captionsData: 'alt',
+//   captionPosition: 'bottom',
+//   captionDelay: 250,
+// });
+// console.log(galleryLightBox);
+
+// lightbox.on('show.simplelightbox', function () {
+//   console.log('heloo');
+// });
+// lightbox.refresh();
+
+// let gallery = new SimpleLightbox(".gallery a", {
+//   captionDelay: 250,
+//   captionsData: "alt",
+// });
+// let lightbox = new SimpleLightbox(
+//  ('.gallery a') ,
+//   {
+//     captions: true,
+//     captionsData: 'alt',
+//     captionPosition: 'bottom',
+//     captionDelay: 250,
+//   }
+// );
+// console.log(lightbox);
+
+// lightbox.on('shown.simplelightbox', function () {});
+
+// // lightbox.refresh();
