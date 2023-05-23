@@ -3,7 +3,7 @@ import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import debounce from 'lodash.debounce';
-const DEBOUNCE_DELAY = 250;
+const DEBOUNCE_DELAY = 500;
 
 let galleryLightBox = new SimpleLightbox('.gallery .photo-card-link', {
   widthRatio: 0.8,
@@ -84,7 +84,7 @@ const loadMoreBtn = new LoadMoreBtn({
 loadMoreBtn.hide();
 
 form.addEventListener('submit', onSubmit);
-loadMoreBtn.button.addEventListener('click', fetchPhotos);
+// loadMoreBtn.button.addEventListener('click', fetchPhotos);
 
 function onSubmit(event) {
   event.preventDefault();
@@ -96,9 +96,10 @@ function onSubmit(event) {
     photoService.searchValue = value;
     photoService.resetPage();
     clearPhotoGallery();
-    getPhotoMarkup();
     form.reset();
-    loadMoreBtn.show();
+    getPhotoMarkup();
+    window.addEventListener('scroll', handleScrollDeb);
+    // loadMoreBtn.show();
   }
 }
 
@@ -119,8 +120,8 @@ async function getPhotoMarkup() {
         (markup, photo) => markup + createMarkup(photo),
         ''
       );
-      loadMoreBtn.enable();
       updatePhotoGallery(markuplist);
+      addStatusLoadMoreBtn(arrayPhotos.length);
       galleryLightBox.refresh();
     }
   } catch (err) {
@@ -130,25 +131,29 @@ async function getPhotoMarkup() {
 
 async function fetchPhotos() {
   try {
+    window.addEventListener('scroll', handleScrollDeb);
     loadMoreBtn.disable();
     const response = await photoService.getPhoto();
     const arrayPhotos = response.data.hits;
-    if (arrayPhotos.length === 0) {
-      loadMoreBtn.hide();
-      Notify.failure(
-        "We're sorry, but you've reached the end of search results."
-      );
-      return '';
-    } else {
+    if (arrayPhotos.length !== 0 ) {
       showTotalHits(response.data.totalHits);
       const markuplist = arrayPhotos.reduce(
         (markup, photo) => markup + createMarkup(photo),
         ''
       );
-      loadMoreBtn.enable();
       updatePhotoGallery(markuplist);
+      addStatusLoadMoreBtn();
       galleryLightBox.refresh();
+    } else {
+      // loadMoreBtn.hide();
+      window.removeEventListener('scroll', handleScrollDeb);
+      console.log('click event listener was removed from btn');
+
+      Notify.failure(
+        "We're sorry, but you've reached the end of search results."
+      );
     }
+
   } catch (err) {
     onError(err);
   }
@@ -212,13 +217,22 @@ function onError(err) {
 function showTotalHits(totalHits) {
   Notify.info(`Hooray! We found ${totalHits} images.`);
 }
-// ! Infinite scroll
-function handleScroll() {
-  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
 
-  if (scrollTop + clientHeight >= scrollHeight - 5) {
-    fetchPhotos();
+function addStatusLoadMoreBtn(length) {
+  if (length < 40) {
+    return loadMoreBtn.hide();
+  } else {
+    return loadMoreBtn.enable();
   }
 }
+// ! Infinite scroll
+const handleScrollDeb = debounce(() => {
+  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
 
-window.addEventListener('scroll', debounce(handleScroll, DEBOUNCE_DELAY));
+  if (scrollTop + clientHeight >= scrollHeight - 1) {
+    fetchPhotos();
+  }
+}, DEBOUNCE_DELAY);
+
+window.addEventListener('scroll', handleScrollDeb);
+console.log(document);
